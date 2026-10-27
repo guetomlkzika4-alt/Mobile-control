@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Control Mobile - Painel de Desempenho</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Font: Rajdhani & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cyber: {
+              bg: '#080d1a',
+              card: '#0f172a',
+              cardHighlight: '#1e293b',
+              neonBlue: '#00f0ff',
+              neonBlueDark: '#008b99',
+              electricBlue: '#3b82f6',
+              glow: 'rgba(0, 240, 255, 0.25)',
+              accent: '#06b6d4',
+              warning: '#f59e0b',
+              danger: '#ef4444',
+              success: '#10b981'
+            }
+          },
+          fontFamily: {
+            rajdhani: ['Rajdhani', 'sans-serif'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilos Customizados para Efeito Cyberpunk Gamer */
+    body {
+      background-color: #030712;
+      font-family: 'Inter', sans-serif;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .font-tech {
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    /* Glows e BORDAS */
+    .border-glow {
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 10px rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+    }
+
+    .border-glow-active {
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.6), inset 0 0 15px rgba(0, 240, 255, 0.3);
+      border: 1px solid rgba(0, 240, 255, 0.9);
+    }
+
+    .text-glow {
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+    }
+
+    /* Animações Customizadas */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(0, 240, 255, 0.7); }
+    }
+
+    .animate-pulse-glow {
+      animation: pulseGlow 2s infinite;
+    }
+
+    @keyframes rotateRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .animate-spin-slow {
+      animation: rotateRing 12s linear infinite;
+    }
+
+    .animate-spin-reverse {
+      animation: rotateRing 8s linear infinite reverse;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #080d1a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #00f0ff;
+      border-radius: 4px;
+    }
+
+    /* Canvas para Touch Test */
+    #touchCanvas {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 text-slate-200">
+
+  <!-- CONTAINER DE SIMULAÇÃO DE SMARTHPHONE -->
+  <div class="w-full max-w-md h-screen sm:h-[880px] bg-cyber-bg sm:rounded-[40px] border-0 sm:border-4 border-slate-800 shadow-2xl flex flex-col overflow-hidden relative border-glow">
+    
+    <!-- BARRA DE STATUS SUPERIOR (SIMULADA) -->
+    <div class="bg-slate-950 px-6 pt-3 pb-2 flex justify-between items-center text-xs text-slate-400 font-tech tracking-wider border-b border-slate-800/60 z-20">
+      <div class="flex items-center space-x-2">
+        <span id="clockDisplay" class="font-bold text-cyber-neonBlue">12:00</span>
+        <span class="text-[10px] bg-cyber-neonBlue/10 text-cyber-neonBlue px-1.5 py-0.5 rounded border border-cyber-neonBlue/30">5G HIGH-SPEED</span>
+      </div>
+      <div class="flex items-center space-x-3 text-cyber-neonBlue">
+        <i class="fa-solid fa-microchip text-xs opacity-80"></i>
+        <i class="fa-solid fa-wifi text-xs"></i>
+        <div class="flex items-center space-x-1">
+          <span id="topBatteryText" class="text-[10px]">88%</span>
+          <i class="fa-solid fa-battery-three-quarters text-sm"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- CABEÇALHO DO APLICATIVO -->
+    <header class="px-5 py-4 bg-slate-900/80 backdrop-blur border-b border-cyan-900/40 flex justify-between items-center z-10">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyber-neonBlue to-blue-700 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-cyan-500/30">
+          <i class="fa-solid fa-bolt text-lg"></i>
+        </div>
+        <div>
+          <h1 class="font-tech text-xl font-bold tracking-wider text-white flex items-center gap-2">
+            CONTROL <span class="text-cyber-neonBlue text-glow">MOBILE</span>
+          </h1>
+          <p class="text-[10px] text-cyan-400/80 font-mono">SYS-ENGINE v4.02 // GAMER EDITION</p>
+        </div>
+      </div>
+      <button onclick="toggleInfoModal()" class="w-9 h-9 rounded-lg bg-slate-800/80 border border-cyan-500/30 flex items-center justify-center text-cyan-400 hover:text-white hover:bg-cyan-500/20 transition">
+        <i class="fa-solid fa-circle-info"></i>
+      </button>
+    </header>
+
+    <!-- ÁREA PRINCIPAL COM SCROLL -->
+    <main class="flex-1 overflow-y-auto p-4 space-y-5 relative pb-20" id="mainContent">
+      
+      <!-- ABA 1: DASHBOARD DE OTIMIZAÇÃO -->
+      <section id="tab-dashboard" class="space-y-5 transition-all duration-300">
+        
+        <!-- GAUGES & DASHBOARD PRINCIPAL -->
+        <div class="bg-gradient-to-b from-slate-900/90 to-cyber-card p-5 rounded-2xl border border-cyan-500/20 relative overflow-hidden shadow-xl">
+          <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyber-neonBlue/10 rounded-full blur-2xl pointer-events-none"></div>
+
+          <!-- Indicador Central Circular de Desempenho / RAM -->
+          <div class="relative flex flex-col items-center justify-center my-2">
+            <!-- Anéis decorativos de fundo -->
+            <div class="w-48 h-48 rounded-full border border-cyan-500/20 absolute animate-spin-slow"></div>
+            <div class="w-44 h-44 rounded-full border border-dashed border-cyan-400/30 absolute animate-spin-reverse"></div>
+            
+            <!-- SVG Meter Gauge -->
+            <div class="relative w-44 h-44 flex items-center justify-center">
+              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <!-- Outer track -->
+                <circle cx="50" cy="50" r="40" stroke="rgba(15, 23, 42, 0.8)" stroke-width="8" fill="transparent" />
+                <!-- Progress circle -->
+                <circle id="ramProgressCircle" cx="50" cy="50" r="40" stroke="url(#cyanGradient)" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="85" stroke-linecap="round" fill="transparent" class="transition-all duration-1000 ease-out"/>
+                <defs>
+                  <linearGradient id="cyanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00f0ff" />
+                    <stop offset="100%" stop-color="#3b82f6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+
+              <!-- Conteúdo no centro do medidor -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span class="text-[10px] uppercase font-tech text-cyan-400 tracking-widest">USO DE RAM</span>
+                <span id="ramUsageVal" class="font-tech font-bold text-4xl text-white text-glow">66<span class="text-xl text-cyber-neonBlue">%</span></span>
+                <span id="ramSubtext" class="text-[11px] text-slate-400 font-mono mt-0.5">5.2 GB / 8.0 GB</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTÃO MASTER OTIMIZAR -->
+          <button id="btnOptimize" onclick="startOptimization()" class="w-full py-4 mt-2 bg-gradient-to-r from-cyber-neonBlueDark via-cyan-500 to-blue-600 rounded-xl font-tech font-bold text-lg text-slate-950 uppercase tracking-wider shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 active:scale-[0.98] transition-all duration-200 flex items-center justify-center space-x-2 border border-cyan-300/40">
+            <i class="fa-solid fa-rocket text-xl animate-bounce"></i>
+            <span>OTIMIZAR SISTEMA AGORA</span>
+          </button>
+
+          <!-- MINI CARDS STATUS HARDWARE (Temp CPU, Temp Bateria, Armazenamento) -->
+          <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-800">
+            <!-- CPU Temp -->
+            <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
+              <i class="fa-solid fa-microchip text-cyber-neonBlue mb-1 text-sm"></i>
+              <p class="text-[10px] text-slate-400 uppercase font-tech">CPU TEMP</p>
+              <p id="cpuTempDisplay" class="font-tech font-bold text-base text-white">41°C</p>
+            </div>
+            <!-- Bateria Temp -->
+            <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
+              <i class="fa-solid fa-temperature-three-quarters text-emerald-400 mb-1 text-sm"></i>
+              <p class="text-[10px] text-slate-400 uppercase font-tech">BAT TEMP</p>
+              <p id="batTempDisplay" class="font-tech font-bold text-base text-white">33.5°C</p>
+            </div>
+            <!-- Armazenamento -->
+            <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-center">
+              <i class="fa-solid fa-hard-drive text-cyan-400 mb-1 text-sm"></i>
+              <p class="text-[10px] text-slate-400 uppercase font-tech">ESPAÇO</p>
+              <p id="storageDisplay" class="font-tech font-bold text-base text-white">74%</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÓDULOS DE MANUTENÇÃO PREDITIVA E SAÚDE DO HARDWARE -->
+        <div class="space-y-3">
+          <h2 class="font-tech text-sm uppercase font-bold text-cyan-400 tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-shield-heart"></i> Manutenção Preditiva & Saúde
+          </h2>
+
+          <div class="bg-cyber-card p-4 rounded-xl border border-slate-800 space-y-3">
+            <!-- Saúde da Bateria -->
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <i class="fa-solid fa-battery-charging text-sm"></i>
+                </div>
+                <div>
+                  <h3 class="text-xs font-semibold text-white">Saúde da Bateria</h3>
+                  <p class="text-[10px] text-slate-400">Vida útil estimada / Ciclos</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-bold text-emerald-400 font-tech">EXCELENTE (94%)</span>
+                <p class="text-[10px] text-slate-400 font-mono">312 Ciclos</p>
+              </div>
+            </div>
+
+            <!-- Diagnóstico da Porta USB-C -->
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-lg bg-cyber-neonBlue/10 border border-cyber-neonBlue/30 flex items-center justify-center text-cyber-neonBlue">
+                  <i class="fa-solid fa-plug text-sm"></i>
+                </div>
+                <div>
+                  <h3 class="text-xs font-semibold text-white">Conector USB-C</h3>
+                  <p class="text-[10px] text-slate-400">Umidade & Conectividade</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-bold text-cyan-400 font-tech"><i class="fa-solid fa-check-circle mr-1"></i>SECO & OK</span>
+                <p class="text-[10px] text-slate-400 font-mono">PD Fast Charge ON</p>
+              </div>
+            </div>
+
+            <!-- Recomendação Limpeza Física -->
+            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <i class="fa-solid fa-broom text-sm"></i>
+                </div>
+                <div>
+                  <h3 class="text-xs font-semibold text-white">Limpeza Física Preventiva</h3>
+                  <p class="text-[10px] text-slate-400">Alto-falantes e Entrada P2/Type-C</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-bold text-amber-400 font-tech">RECOMENDADA</span>
+                <p class="text-[10px] text-slate-400 font-mono">Última há 45 dias</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECOMENDAÇÕES RÁPIDAS -->
+        <div class="bg-gradient-to-r from-blue-900/20 to-cyan-900/20 p-3.5 rounded-xl border border-cyan-500/20 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <i class="fa-solid fa-lightbulb text-cyber-neonBlue text-xl animate-pulse"></i>
+            <div>
+              <p class="text-xs font-bold text-white">Dica do Control Mobile</p>
+              <p class="text-[10px] text-slate-300">Feche 4 apps em segundo plano para liberar +850MB.</p>
+            </div>
+          </div>
+          <button onclick="cleanApps()" class="text-[11px] font-tech font-bold px-3 py-1.5 bg-cyber-neonBlue text-slate-950 rounded-lg hover:bg-cyan-300 transition">
+            FECHAR
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ABA 2: SUÍTE DE TESTES DE TELA & TOUCH -->
+      <section id="tab-tests" class="space-y-4 hidden transition-all duration-300">
+        <div class="border-b border-slate-800 pb-2">
+          <h2 class="font-tech text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-vial text-cyber-neonBlue"></i> SUÍTE DE DIAGNÓSTICO INTERATIVO
+          </h2>
+          <p class="text-xs text-slate-400">Verifique os componentes físicos de tela e resposta tátil.</p>
+        </div>
+
+        <!-- Display Specs Card -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-cyber-card p-3 rounded-xl border border-slate-800 flex items-center space-x-3">
+            <div class="p-2 rounded-lg bg-cyan-500/10 text-cyber-neonBlue">
+              <i class="fa-solid fa-arrows-rotate text-lg"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-tech">TAXA ATUAL</span>
+              <p id="hzDisplay" class="text-sm font-bold text-white font-tech">60 Hz / 120 Hz</p>
+            </div>
+          </div>
+          <div class="bg-cyber-card p-3 rounded-xl border border-slate-800 flex items-center space-x-3">
+            <div class="p-2 rounded-lg bg-cyan-500/10 text-cyber-neonBlue">
+              <i class="fa-solid fa-expand text-lg"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-tech">RESOLUÇÃO</span>
+              <p id="resDisplay" class="text-sm font-bold text-white font-tech">1080 x 2400</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Módulos de Teste Interativos -->
+        <div class="space-y-3">
+          <!-- 1. Teste de Dead Pixels -->
+          <div class="bg-cyber-card p-4 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-display text-cyber-neonBlue"></i>
+                <h3 class="text-xs font-bold text-white uppercase font-tech">1. Teste de Dead Pixel</h3>
+              </div>
+              <span class="text-[10px] text-slate-400">Tela Cheia</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mb-3">Alterna cores puras para identificar pixels queimados ou presos na tela.</p>
+            <button onclick="launchDeadPixelTest()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 font-tech font-bold text-xs rounded-lg uppercase tracking-wider transition">
+              INICIAR INSPEÇÃO DE COR
+            </button>
+          </div>
+
+          <!-- 2. Teste de Touch Screen e Multi-Touch -->
+          <div class="bg-cyber-card p-4 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-hand-pointer text-cyber-neonBlue"></i>
+                <h3 class="text-xs font-bold text-white uppercase font-tech">2. Teste de Resposta ao Toque</h3>
+              </div>
+              <span class="text-[10px] text-slate-400">Grade Tátil</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mb-3">Desenhe na grade e teste todos os pontos de resposta táctil e dead-zones.</p>
+            <button onclick="openTouchCanvas()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 font-tech font-bold text-xs rounded-lg uppercase tracking-wider transition">
+              ABRIR CANVAS DE DESENHO & TOUCH
+            </button>
+          </div>
+
+          <!-- 3. Teste de Frequência / Latência -->
+          <div class="bg-cyber-card p-4 rounded-xl border border-slate-800">
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-stopwatch text-cyber-neonBlue"></i>
+                <h3 class="text-xs font-bold text-white uppercase font-tech">3. Medidor de Latência Tátil</h3>
+              </div>
+            </div>
+            <div id="latencyArea" onclick="testTouchLatency()" class="h-20 bg-slate-950 border border-dashed border-cyan-500/40 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-cyber-neonBlue transition p-2">
+              <span class="text-xs font-tech text-cyan-400 uppercase">CLIQUE/TOQUE AQUI RAPIDAMENTE</span>
+              <span id="latencyResult" class="text-lg font-bold text-white font-mono mt-1">-- ms</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 3: GERENCIADOR DE CACHE & UTILITÁRIOS -->
+      <section id="tab-cleaner" class="space-y-4 hidden transition-all duration-300">
+        <div class="border-b border-slate-800 pb-2">
+          <h2 class="font-tech text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-broom text-cyber-neonBlue"></i> LIMPEZA DE CACHE E UTILITÁRIOS
+          </h2>
+          <p class="text-xs text-slate-400">Remova resíduos do sistema e otimize espaço.</p>
+        </div>
+
+        <!-- Medidor de Lixo Acumulado -->
+        <div class="bg-cyber-card p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-tech">LIXO DETECTADO</span>
+            <p id="junkAmountText" class="text-2xl font-bold font-tech text-amber-400 text-glow">1.48 GB</p>
+            <p class="text-[10px] text-slate-400">Cache de APKs, logs antigos e resíduos de navegação</p>
+          </div>
+          <button onclick="cleanJunkFiles()" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 font-tech font-bold text-xs text-slate-950 rounded-lg shadow-lg hover:brightness-110 transition uppercase">
+            LIMPAR LIXO
+          </button>
+        </div>
+
+        <!-- Lista de Utilitários Especiais -->
+        <div class="space-y-2">
+          <h3 class="text-xs font-bold font-tech uppercase text-cyan-400">Ferramentas Rápidas</h3>
+
+          <!-- Desmagnetizador / Expulsor de Água de Alto Falante -->
+          <div class="bg-cyber-card p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
+                <i class="fa-solid fa-volume-high text-base"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-white">Ejetor de Água do Alto-Falante</h4>
+                <p class="text-[10px] text-slate-400">Emite frequências sonoras para vibração física</p>
+              </div>
+            </div>
+            <button id="btnSpeakerClean" onclick="playSpeakerCleaner()" class="px-3 py-1.5 bg-slate-800 text-cyan-400 border border-cyan-500/30 text-xs font-tech font-bold rounded-lg hover:bg-cyan-500/20 transition">
+              EXECUTAR
+            </button>
+          </div>
+
+          <!-- Gerenciador de RAM Profundo -->
+          <div class="bg-cyber-card p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
+                <i class="fa-solid fa-memory text-base"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-white">Hibernador de Apps em Background</h4>
+                <p class="text-[10px] text-slate-400">Força parada em tarefas secundárias</p>
+              </div>
+            </div>
+            <button onclick="hibernateApps()" class="px-3 py-1.5 bg-slate-800 text-purple-400 border border-purple-500/30 text-xs font-tech font-bold rounded-lg hover:bg-purple-500/20 transition">
+              HIBERNAR
+            </button>
+          </div>
+
+          <!-- Resfriamento Turbo de CPU -->
+          <div class="bg-cyber-card p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="p-2 bg-cyan-500/10 text-cyan-400 rounded-lg">
+                <i class="fa-solid fa-snowflake text-base"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-white">Resfriamento Turbo da CPU</h4>
+                <p class="text-[10px] text-slate-400">Reduz clock momentâneo e libera núcleos</p>
+              </div>
+            </div>
+            <button onclick="coolDownCPU()" class="px-3 py-1.5 bg-slate-800 text-cyan-400 border border-cyan-500/30 text-xs font-tech font-bold rounded-lg hover:bg-cyan-500/20 transition">
+              RESFRIAR
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 4: CONFIGURAÇÕES & DISPOSITIVO -->
+      <section id="tab-settings" class="space-y-4 hidden transition-all duration-300">
+        <div class="border-b border-slate-800 pb-2">
+          <h2 class="font-tech text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-gears text-cyber-neonBlue"></i> INFORMAÇÕES DO DISPOSITIVO
+          </h2>
+          <p class="text-xs text-slate-400">Especificações de Hardware detectadas.</p>
+        </div>
+
+        <div class="bg-cyber-card rounded-xl p-4 border border-slate-800 space-y-3 font-mono text-xs">
+          <div class="flex justify-between py-1 border-b border-slate-800/80">
+            <span class="text-slate-400">Nome da Aplicação:</span>
+            <span class="text-cyber-neonBlue font-bold">Control Mobile</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/80">
+            <span class="text-slate-400">SISTEMA OPERACIONAL:</span>
+            <span id="sysInfoOs" class="text-white">Android 14 (Simulado)</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/80">
+            <span class="text-slate-400">NAVEGADOR USER-AGENT:</span>
+            <span id="sysInfoAgent" class="text-white truncate max-w-[160px]">Mobile WebKit</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/80">
+            <span class="text-slate-400">NÚCLEOS DE CPU:</span>
+            <span id="sysInfoCores" class="text-white">8 Cores Octa-Core</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/80">
+            <span class="text-slate-400">STATUS DE REDE:</span>
+            <span class="text-emerald-400">ONLINE (5G NR)</span>
+          </div>
+          <div class="flex justify-between py-1">
+            <span class="text-slate-400">MODO GAMER:</span>
+            <span class="text-cyber-neonBlue font-bold">ATIVADO</span>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 text-center">
+          <p class="text-xs text-slate-400 mb-2">Deseja resetar as estatísticas do Control Mobile?</p>
+          <button onclick="resetAppStats()" class="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-400 font-tech font-bold text-xs rounded-lg hover:bg-red-500/20 transition">
+            REDEFINIR ESTATÍSTICAS
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- NAVEGAÇÃO INFERIOR / TABS -->
+    <nav class="bg-slate-950/95 border-t border-cyan-900/40 px-4 py-2 flex justify-around items-center z-20 backdrop-blur-md">
+      <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center text-cyber-neonBlue transition-all">
+        <i class="fa-solid fa-gauge-high text-lg"></i>
+        <span class="text-[10px] font-tech font-bold uppercase mt-1">Painel</span>
+      </button>
+
+      <button onclick="switchTab('tests')" id="nav-tests" class="flex flex-col items-center text-slate-500 hover:text-cyan-400 transition-all">
+        <i class="fa-solid fa-vial-circle-check text-lg"></i>
+        <span class="text-[10px] font-tech font-bold uppercase mt-1">Testes</span>
+      </button>
+
+      <button onclick="switchTab('cleaner')" id="nav-cleaner" class="flex flex-col items-center text-slate-500 hover:text-cyan-400 transition-all">
+        <i class="fa-solid fa-broom-ball text-lg"></i>
+        <span class="text-[10px] font-tech font-bold uppercase mt-1">Limpeza</span>
+      </button>
+
+      <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center text-slate-500 hover:text-cyan-400 transition-all">
+        <i class="fa-solid fa-sliders text-lg"></i>
+        <span class="text-[10px] font-tech font-bold uppercase mt-1">Ajustes</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODAL / OVERLAY DE ANIMATION OTIMIZAÇÃO EM EXECUÇÃO -->
+  <div id="optimizeModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-50 hidden">
+    <div class="relative w-32 h-32 flex items-center justify-center mb-6">
+      <div class="absolute inset-0 rounded-full border-4 border-cyber-neonBlue/20 animate-ping"></div>
+      <div class="w-full h-full rounded-full border-4 border-t-cyber-neonBlue border-r-transparent border-b-cyan-500 border-l-transparent animate-spin"></div>
+      <i class="fa-solid fa-bolt text-4xl text-cyber-neonBlue text-glow animate-bounce"></i>
+    </div>
+    <h3 class="font-tech text-xl font-bold text-white tracking-widest uppercase">OTIMIZANDO <span class="text-cyber-neonBlue">CONTROL MOBILE</span></h3>
+    <p id="optimizeStatusText" class="text-xs text-cyan-400 font-mono mt-2 animate-pulse">Limpando cache de memória RAM...</p>
+    
+    <!-- Barra de progresso -->
+    <div class="w-64 h-2 bg-slate-800 rounded-full mt-6 overflow-hidden border border-cyan-500/30">
+      <div id="optimizeProgressBar" class="h-full bg-gradient-to-r from-cyber-neonBlue to-blue-600 w-0 transition-all duration-300"></div>
+    </div>
+  </div>
+
+  <!-- OVERLAY DE TESTE DE DEAD PIXEL -->
+  <div id="deadPixelOverlay" onclick="nextDeadPixelColor()" class="fixed inset-0 z-50 hidden cursor-pointer flex flex-col justify-between p-6">
+    <div class="bg-black/40 text-white p-2 rounded text-center text-xs backdrop-blur font-mono pointer-events-none">
+      Clique/Toque para mudar a cor. Pressione duas vezes rápido para sair.
+    </div>
+    <div class="text-center text-xs font-mono text-white/50 pointer-events-none">
+      Cor Atual: <span id="pixelColorName">Branco</span>
+    </div>
+  </div>
+
+  <!-- OVERLAY DE TESTE DE TOUCH SCREEN (CANVAS) -->
+  <div id="touchModal" class="fixed inset-0 bg-slate-950 z-50 hidden flex flex-col">
+    <div class="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+      <div class="text-xs font-tech text-cyan-400 font-bold">PAINEL DE TESTE DE TOUCH & RESPOSTA TÁTIL</div>
+      <button onclick="closeTouchCanvas()" class="px-3 py-1 bg-red-500/20 border border-red-500/40 text-red-400 rounded text-xs font-tech font-bold">
+        FECHAR TESTE
+      </button>
+    </div>
+    <div class="flex-1 relative bg-slate-950 overflow-hidden">
+      <canvas id="touchCanvas" class="w-full h-full block"></canvas>
+    </div>
+  </div>
+
+  <!-- MODAL DE INFORMAÇÕES DO CONTROL MOBILE -->
+  <div id="infoModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-cyber-card border border-cyan-500/40 rounded-2xl p-5 max-w-xs w-full space-y-4 relative shadow-2xl">
+      <button onclick="toggleInfoModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-cyber-neonBlue flex items-center justify-center text-slate-950 font-bold text-xl">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <div>
+          <h3 class="font-tech text-lg font-bold text-white">Control Mobile</h3>
+          <p class="text-[10px] text-cyan-400">Versão Otimizada v4.02</p>
+        </div>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        O **Control Mobile** é o seu painel definitivo para diagnóstico de hardware, otimização de memória tátil e preservação da saúde do seu aparelho Android.
+      </p>
+      <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800 text-[11px] text-cyan-300 font-mono">
+        ✓ Sem propagandas nocivas<br>
+        ✓ Testes de hardware em tempo real<br>
+        ✓ Resposta tátil Gamer
+      </div>
+      <button onclick="toggleInfoModal()" class="w-full py-2 bg-cyber-neonBlue text-slate-950 font-tech font-bold text-xs rounded-lg uppercase">
+        ENTENDIDO
+      </button>
+    </div>
+  </div>
+
+  <!-- SOUND SYNTHESIZER (TONE JS SIMPLES COM WEB AUDIO API) -->
+  <script>
+    // Contexto de Áudio Web para Efeitos Sonoros Gamer
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.log('Audio não habilitado ainda');
+      }
+    }
+
+    // RELÓGIO DA BARRA DE STATUS
+    function updateClock() {
+      const now = new Date();
+      const hrs = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clockDisplay').textContent = `${hrs}:${mins}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // SISTEMA DE TROCA DE ABAS
+    function switchTab(tabName) {
+      playBeep(600, 'sine', 0.05);
+      const tabs = ['dashboard', 'tests', 'cleaner', 'settings'];
+      tabs.forEach(t => {
+        const tabEl = document.getElementById(`tab-${t}`);
+        const navEl = document.getElementById(`nav-${t}`);
+        if (t === tabName) {
+          tabEl.classList.remove('hidden');
+          navEl.classList.remove('text-slate-500');
+          navEl.classList.add('text-cyber-neonBlue');
+        } else {
+          tabEl.classList.add('hidden');
+          navEl.classList.remove('text-cyber-neonBlue');
+          navEl.classList.add('text-slate-500');
+        }
+      });
+    }
+
+    // ATUALIZAÇÃO DA GUAGE DE RAM (CIRCUITO)
+    function setRamPercentage(percent) {
+      const circle = document.getElementById('ramProgressCircle');
+      const ramText = document.getElementById('ramUsageVal');
+      const circumference = 2 * Math.PI * 40; // 251.2
+      const offset = circumference - (percent / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+      ramText.innerHTML = `${percent}<span class="text-xl text-cyber-neonBlue">%</span>`;
+      
+      const usedGb = ((percent / 100) * 8).toFixed(1);
+      document.getElementById('ramSubtext').textContent = `${usedGb} GB / 8.0 GB`;
+    }
+
+    // PROCESSO INTERATIVO DE OTIMIZAÇÃO
+    function startOptimization() {
+      playBeep(800, 'triangle', 0.15);
+      const modal = document.getElementById('optimizeModal');
+      const progressBar = document.getElementById('optimizeProgressBar');
+      const statusText = document.getElementById('optimizeStatusText');
+      
+      modal.classList.remove('hidden');
+      progressBar.style.width = '0%';
+
+      const steps = [
+        { progress: '25%', text: 'Verificando processos de fundo...' },
+        { progress: '50%', text: 'Limpando memória RAM excedente...' },
+        { progress: '85%', text: 'Otimizando GPU & taxa de atualização...' },
+        { progress: '100%', text: 'Control Mobile: Otimização concluída!' }
+      ];
+
+      let stepIdx = 0;
+      const interval = setInterval(() => {
+        if (stepIdx < steps.length) {
+          progressBar.style.width = steps[stepIdx].progress;
+          statusText.textContent = steps[stepIdx].text;
+          playBeep(400 + (stepIdx * 200), 'sine', 0.08);
+          stepIdx++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            modal.classList.add('hidden');
+            // Reduz visualmente a RAM
+            setRamPercentage(38);
+            document.getElementById('cpuTempDisplay').textContent = '36°C';
+            playBeep(1200, 'sine', 0.3);
+          }, 500);
+        }
+      }, 600);
+    }
+
+    // LIMPEZA RÁPIDA DE APPS
+    function cleanApps() {
+      playBeep(700, 'sine', 0.1);
+      setRamPercentage(45);
+      alert('Control Mobile: 4 aplicativos em segundo plano foram hibernados com sucesso!');
+    }
+
+    // EXPULSOR DE ÁGUA POR FREQUÊNCIA SONORA
+    let isPlayingSpeakerClean = false;
+    function playSpeakerCleaner() {
+      initAudio();
+      const btn = document.getElementById('btnSpeakerClean');
+      if (!isPlayingSpeakerClean) {
+        isPlayingSpeakerClean = true;
+        btn.textContent = 'PARAR (165Hz)';
+        btn.classList.add('bg-red-500/20', 'text-red-400');
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(165, audioCtx.currentTime); // Frequência ideal para expulssão
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        
+        window.speakerOsc = osc;
+      } else {
+        isPlayingSpeakerClean = false;
+        btn.textContent = 'EXECUTAR';
+        btn.classList.remove('bg-red-500/20', 'text-red-400');
+        if (window.speakerOsc) {
+          window.speakerOsc.stop();
+        }
+      }
+    }
+
+    // LIMPEZA DE LIXO DE DISCO
+    function cleanJunkFiles() {
+      playBeep(900, 'square', 0.1);
+      document.getElementById('junkAmountText').textContent = '0 MB';
+      document.getElementById('storageDisplay').textContent = '62%';
+      alert('Control Mobile: 1.48 GB de arquivos temporários e cache foram removidos!');
+    }
+
+    // HIBERNAR APPS
+    function hibernateApps() {
+      playBeep(500, 'sine', 0.1);
+      alert('Control Mobile: Todos os serviços secundários em background foram colocados em modo de espera.');
+    }
+
+    // RESFRIAR CPU
+    function coolDownCPU() {
+      playBeep(300, 'sine', 0.2);
+      document.getElementById('cpuTempDisplay').textContent = '32°C';
+      alert('Control Mobile: Núcleos de alta frequência resfriados com sucesso. Temperatura estabilizada em 32°C.');
+    }
+
+    // TESTE DE DEAD PIXEL
+    const deadPixelColors = [
+      { name: 'Branco Puro', code: '#FFFFFF' },
+      { name: 'Preto (Vazamento de Luz)', code: '#000000' },
+      { name: 'Vermelho Primário', code: '#FF0000' },
+      { name: 'Verde Primário', code: '#00FF00' },
+      { name: 'Azul Primário', code: '#0000FF' }
+    ];
+    let currentColorIdx = 0;
+    let lastClickTime = 0;
+
+    function launchDeadPixelTest() {
+      const overlay = document.getElementById('deadPixelOverlay');
+      currentColorIdx = 0;
+      updatePixelOverlayColor();
+      overlay.classList.remove('hidden');
+    }
+
+    function updatePixelOverlayColor() {
+      const overlay = document.getElementById('deadPixelOverlay');
+      const colorName = document.getElementById('pixelColorName');
+      const col = deadPixelColors[currentColorIdx];
+      overlay.style.backgroundColor = col.code;
+      colorName.textContent = col.name;
+    }
+
+    function nextDeadPixelColor() {
+      const now = Date.now();
+      if (now - lastClickTime < 300) {
+        // Double tap para sair
+        document.getElementById('deadPixelOverlay').classList.add('hidden');
+        return;
+      }
+      lastClickTime = now;
+
+      currentColorIdx = (currentColorIdx + 1) % deadPixelColors.length;
+      updatePixelOverlayColor();
+    }
+
+    // TESTE INTERATIVO DE TOUCH CANVAS
+    let canvas, ctx;
+    function openTouchCanvas() {
+      const modal = document.getElementById('touchModal');
+      modal.classList.remove('hidden');
+      
+      canvas = document.getElementById('touchCanvas');
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+      ctx = canvas.getContext('2d');
+
+      // Desenhar grade de teste de toque
+      drawTouchGrid();
+
+      // Eventos de toque e mouse
+      canvas.addEventListener('touchstart', handleTouch, false);
+      canvas.addEventListener('touchmove', handleTouch, false);
+      canvas.addEventListener('mousedown', handleMouse, false);
+      canvas.addEventListener('mousemove', handleMouseDraw, false);
+    }
+
+    function drawTouchGrid() {
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
+      ctx.lineWidth = 1;
+
+      const cols = 8;
+      const rows = 14;
+      const cellW = canvas.width / cols;
+      const cellH = canvas.height / rows;
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          ctx.strokeRect(i * cellW, j * cellH, cellW, cellH);
+        }
+      }
+    }
+
+    let isMouseDown = false;
+    function handleMouse(e) {
+      isMouseDown = true;
+      drawTouchPoint(e.clientX, e.clientY - 40);
+    }
+
+    function handleMouseDraw(e) {
+      if (isMouseDown) {
+        drawTouchPoint(e.clientX, e.clientY - 40);
+      }
+    }
+
+    window.addEventListener('mouseup', () => { isMouseDown = false; });
+
+    function handleTouch(e) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        drawTouchPoint(touch.clientX - rect.left, touch.clientY - rect.top);
+      }
+    }
+
+    function drawTouchPoint(x, y) {
+      ctx.fillStyle = '#00f0ff';
+      ctx.beginPath();
+      ctx.arc(x, y, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
+      ctx.beginPath();
+      ctx.arc(x, y, 24, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function closeTouchCanvas() {
+      document.getElementById('touchModal').classList.add('hidden');
+    }
+
+    // TESTE DE LATÊNCIA TÁTIL
+    let lastTouchStartTime = 0;
+    function testTouchLatency() {
+      const now = performance.now();
+      if (lastTouchStartTime > 0) {
+        const diff = (now - lastTouchStartTime).toFixed(1);
+        document.getElementById('latencyResult').textContent = `${diff} ms (Resposta Ultra-Rápida)`;
+        playBeep(1000, 'sine', 0.05);
+      } else {
+        document.getElementById('latencyResult').textContent = `Toque novamente...`;
+      }
+      lastTouchStartTime = now;
+    }
+
+    // INFO MODAL
+    function toggleInfoModal() {
+      const modal = document.getElementById('infoModal');
+      modal.classList.toggle('hidden');
+    }
+
+    // RESET APP
+    function resetAppStats() {
+      playBeep(200, 'sine', 0.2);
+      setRamPercentage(66);
+      document.getElementById('junkAmountText').textContent = '1.48 GB';
+      document.getElementById('cpuTempDisplay').textContent = '41°C';
+      document.getElementById('storageDisplay').textContent = '74%';
+      alert('Control Mobile: Estatísticas restauradas para o estado inicial de simulação.');
+    }
+
+    // DETECÇÃO INICIAL DE HARDWARE SIMULADO
+    window.onload = function() {
+      setRamPercentage(66);
+      
+      // Detectar Resolução de Tela Real do Usuário
+      document.getElementById('resDisplay').textContent = `${window.screen.width} x ${window.screen.height}`;
+      
+      // Informações do Sistema
+      if (navigator.userAgent.includes('Android')) {
+        document.getElementById('sysInfoOs').textContent = 'Android OS Detectado';
+      } else {
+        document.getElementById('sysInfoOs').textContent = 'Android 14 (Simulado)';
+      }
+
+      document.getElementById('sysInfoCores').textContent = `${navigator.hardwareConcurrency || 8} Cores Octa-Core`;
+      document.getElementById('sysInfoAgent').textContent = navigator.userAgent;
+    };
+  </script>
+</body>
+</html>
